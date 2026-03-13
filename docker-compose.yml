@@ -1,0 +1,31 @@
+services:
+  git-pull-agent:
+    build: .
+    container_name: git-pull-agent
+    restart: unless-stopped
+    environment:
+      # Required: The URL of the Git repository to pull
+      - GIT_REPO_URL=${GIT_REPO_URL:-https://github.com/your/repo.git}
+      
+      # Optional: The local path inside the container where the repo will be synced
+      - GIT_SYNC_PATH=/git-repo
+      
+      # Optional: The interval in seconds between pulls (default: 60)
+      - GIT_PULL_INTERVAL_SECONDS=${GIT_PULL_INTERVAL_SECONDS:-60}
+      
+      # Optional: Authentication method (none, ssh, http-basic)
+      - GIT_AUTH_METHOD=${GIT_AUTH_METHOD:-none}
+      
+      # Required if GIT_AUTH_METHOD=ssh
+      - GIT_SSH_KEY_PATH=${GIT_SSH_KEY_PATH:-/root/.ssh/id_rsa}
+      - GIT_SSH_KEY_PASSPHRASE=${GIT_SSH_KEY_PASSPHRASE:-}
+      
+      # Required if GIT_AUTH_METHOD=http-basic
+      - GIT_HTTP_USERNAME=${GIT_HTTP_USERNAME:-}
+      - GIT_HTTP_PASSWORD=${GIT_HTTP_PASSWORD:-}
+    volumes:
+      # Mount a host directory to persist the synced repository
+      - ${HOST_SYNC_PATH:-./git-repo}:/git-repo
+      
+      # If using SSH, mount your private key (ensure correct permissions)
+      # - ${HOST_SSH_KEY_PATH:-~/.ssh/id_rsa}:/root/.ssh/id_rsa:ro
